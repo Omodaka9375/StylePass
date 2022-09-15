@@ -1,7 +1,7 @@
 
 # Stylepass 
 
-This is a single page, static website that tries to identify a person behind the keyboard using his typing style.
+This is a single page, static website that can identify a person behind the keyboard using his typing style.
 
 ![Logo](typing.png)
 
