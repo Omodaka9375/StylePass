@@ -1,5 +1,5 @@
 
-# Stylepass 
+# Stylepass-js
 
 This is a single page, static website that can identify a person behind the keyboard using his typing style.
 
