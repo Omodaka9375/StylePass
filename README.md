@@ -26,7 +26,7 @@ This demo is for educational purposes only.
 
 ## Demo
 
-[Live demo]()
+[Live demo](https://omodaka9375.github.io/StylePass/)
 
 ## Related
 
