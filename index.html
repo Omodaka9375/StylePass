@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+  <meta charset=utf-8>
+  <meta http-equiv=”Cache-Control” content=”no-cache” />
+  <meta http-equiv=”Cache-Control” content=”no-store” />
+  <head>
+    <title>Keystroke style verification in javascript</title>
+    <script src="js/d3.v4.min.js"></script>
+    <script src="js/bootstrap.bundle.min.js"></script>
+    <script src="js/stylepass.js"></script> 
+    <script src="js/app.js"></script> 
+    <link rel="stylesheet" href="css/bootstrap.min.css" >
+  <style>
+    
+  </style>
+  </head>
+  <body style="width: 50%; margin-left:auto; margin-right: auto;">
+    <div id="content" style="text-align: center; padding-top: 50px;">
+      <h1><i>Hello</i>, is this <u>you</u>?</h1>
+      <p><i>Keystroke style verification using javascript</i></p>
+      <ul class="list-inline">
+        <li style="padding:5px;display: inline-block;"><a href="javascript:showAbout()">about</a></li>
+        <li style="padding:5px;display: inline-block;"><a href="https://github.com/Omodaka9375/StylePass" target="_blank">code</a></li>
+      </ul>
+      <div id="about" style="text-align: center; display: none;">
+        <p>
+          This is a single page, static website that tries to identify a person behind the keyboard using his typing style. 
+          Everything is encrypted with your <i>master password</i> and stored localy in IndexedDB. It works offline - no data leaves the browser. 
+          What is <i>magical phrase</i>? Magical phrase can be any word, email or username you choose, with more than 5 characters (no spaces). The longer the word the more secure it is. 
+          Unlike passwords, anyone can know your magical phrase, but they can't replicate your unique typing style.
+        </p>
+        <p>
+          To create your signature you need to choose a magical phrase and master password. You will then be prompted to enter your magical phrase 4 times as consistently as you can.
+          This will create your master signature that can later be compared with the real input. This plays a crucial role in deciding if the person behind the keyboard is you.
+        </p>
+        <p>
+          You can export/import the data used to create your unique signature as a CSV file. By setting the difficulty level you are raising the threshold for required similarity.
+          This demo is for educational purposes only. 
+        </p>
+        <p>
+          You can read the full article here:
+          <a href="https://hackernoon.com/using-javascript-to-identify-unique-typing-styles-k61b35bi" target="_blank">Using Javascript to Identify Unique Typing Styles</a>
+        </p>
+        <hr>
+      </div>
+      <img id="homeimage" src="typing.png" width="250" >
+      <br>
+
+      <div id="startTab" style="text-align: center;">
+        <div id="loginStart" style="display: none; text-align: center;">
+          <br>
+          <h5>Welcome back, <br><br>Enter your master password</h5><br>
+          <input type="password" id="loginPassword" minlength="5" style="border-radius: 5px;" />
+          <button id="login" onclick="checkMasterKey()" style="border-radius: 5px;">Login</button>
+        </div>
+        <div id="newStart" style="display: none; text-align: center;">
+          <br>
+          <h5>Welcome, let's start</h5><br>
+          <p>Type your <b>magic phrase</b> and set your <b>master password</b> below:</p>
+          <input type="text" id="startEmail" minlength="5" placeholder="Enter your magic phrase" style="border-radius: 5px; margin-bottom: 10px;" /><br>
+          <input type="password" id="startPassword" minlength="5" placeholder="Enter your password" style="border-radius: 5px;"/><br><br>
+          <button id="start" onclick="getMasterKey()" style="border-radius: 5px;">Start</button>
+          <br><br><h5> --- or ---</h5><br>
+          <h5> Import signatures from file</h5><br>
+          <button onclick="showImportInputOne()" style="border-radius: 5px; margin-bottom: 20px;">Import signatures</button><br>
+          <div id="showImportOpt" style="display: none;">
+            <label for="importMasterPassword">Your master password:</label><br>
+            <input type="password" minlength="5" id="importMasterPassword"><br><br>
+  
+            <label for="importMasterPhrase">Your magic phrase:</label><br>
+            <input type="text" minlength="5" id="importMasterPhrase"><br><br>
+            <button onclick="handleUploadClickOne()" style="border-radius: 5px; margin-bottom: 30px;"> Upload file</button>
+            <input id='fileidOne' onchange="importSigsOne(this)" type='file' hidden/>
+            <br><br>
+          </div>          
+        </div>
+      </div>
+      <div id="createTab" style="display:none;">
+        <br>
+        <h5>Start by typing your <b>magical phrase</b> below:</h5>
+               
+        <label><i>* after entering a sample click outside of box or just press TAB</i></label>
+        <br>
+        <label><i>** start typing again to submit minimum required number of samples</i></label>
+        <br><br>
+        <input type="text" id="textRecord" onfocus="startRecording()" onfocusout="startRecording()" style="width: 250px; border-radius: 5px;">
+        </input>
+        <img id="recBttn" src='img/rec.jpg' style="display: none;" />
+        <img id="correctBttn" src='img/correct.png' style="display: none;" />
+        <img id="wrongBttn" src='img/wrong.png' style="display: none;" />
+        <img id="saveBttn" src='img/save.png' style="display: none; width: 20px; cursor: pointer; margin-left: 10px; margin-top: -5px;" onclick="saveSamples()" /> 
+        <br><br>
+        <label><b>Total samples collected:</b> <label id="counterView">0</label>/<label id="minSampleView"></label></label>
+        <br>
+        <button id="showMatching" onclick="showMatchTab()" style="display: none; border-radius: 5px; margin-top: 20px;">Test matching</button>
+        <button id="showRedo" onclick="showRedo()" style="display: none; border-radius: 5px; margin-top: 20px;">Redo entry</button>
+        <br>
+        <svg width="400" height="240"></svg>
+        <h5 id="displayRes1"></h5>
+        <br><br>
+      </div>
+      <div id="matchTab" style="display:none; text-align: center;">
+        <br>
+        <h4><b>Options</b></h4><br>
+
+        <form name="diffSelection" >Set security level:<br>
+          <select id="diffSelect" onchange="setDifficultyLvl()" style="margin-top: 10px;" >
+            <option value='0'>Low</option>
+            <option value='1'>Medium</option>
+            <option selected="selected" value='2'>Strong</option>
+          </select>
+        </form>
+        
+       <br>
+       <hr>
+        <label style="margin-bottom: 15px;">Practice typing your <b>magic phrase</b> below:</label>
+        <br>
+        <input type="text" id="testRecord" onfocus="startRecordingTest()" onfocusout="stopRecordingTest()" style="width: 250px;margin-bottom: 10px;"></input>
+        <img id="correctBttn1" src='img/correct.png' style="display: none;" />
+        <img id="wrongBttn1" src='img/wrong.png' style="display: none;" />
+        <br>
+        <h5 id="displayRes"></h5>
+        <hr>
+        <br>
+        <button onclick="showImportInput()" tabindex="-1" style="border-radius: 5px; margin-bottom: 20px;">Import signatures</button><br>
+        <div id="showImport" style="display: none;">
+          <label for="importMastPass">Your master password:</label><br>
+          <input type="password" minlength="5" id="importMastPass"><br><br>
+
+          <label for="importMastPhrase">Your magic phrase:</label><br>
+          <input type="text" minlength="5" id="importMastPhrase"><br><br>
+          <button onclick="handleUploadClick()" style="border-radius: 5px; margin-bottom: 30px;"> Upload file</button>
+        </div>
+        <button onclick="saveSamples()" tabindex="-1" style="border-radius: 5px; margin-bottom: 20px;">Export signatures</button>
+        <input id='fileid' onchange="importSigs(this)" type='file' hidden/>
+
+      </div>
+      <br><br>
+      <p style="text-align: center; bottom: -30px; font-size: smaller;" tabindex="-1"><a href="https://twitter.com/LordOfThePies4" target="_blank" tabindex="-1">@Omodaka9375</a></p>
+    </div>
+  </body>
+</html>
